@@ -16,7 +16,6 @@ func (a *App) Run() {
 
 	for {
 		newStudent, err := a.inputData()
-
 		if err != nil {
 			if err != io.EOF {
 				fmt.Print(err)
@@ -27,7 +26,6 @@ func (a *App) Run() {
 		}
 
 		_, err = a.storeData(newStudent)
-
 		if err != nil {
 			fmt.Print(err)
 
@@ -37,26 +35,25 @@ func (a *App) Run() {
 }
 
 func (a *App) inputData() (*domain.Student, error) {
-	for {
-		fmt.Print("Введите данные (Имя, возраст, курс) через пробел или нажмите `ctrl+d` для завершения: ")
+	fmt.Print("Введите данные (Имя, возраст, курс) через пробел или нажмите `ctrl+d` для завершения: ")
 
-		var age, grade int
-		var name string
-		_, err := fmt.Scanf("%s %d %d", &name, &age, &grade)
-		if err != nil {
-			return nil, err
-		}
+	var age, grade int
+	var name string
 
-		if name <= "" || age <= 0 || grade <= 0 {
-			return nil, errors.New(fmt.Sprintf("Некорректные данные %s%d%d", name, age, grade))
-		}
-
-		return &domain.Student{
-			Name:  name,
-			Age:   age,
-			Grade: grade,
-		}, nil
+	_, err := fmt.Scanf("%s %d %d", &name, &age, &grade)
+	if err != nil {
+		return nil, err
 	}
+
+	if name <= "" || age <= 0 || grade <= 0 {
+		return nil, errors.New(fmt.Sprintf("Некорректные данные %s%d%d", name, age, grade))
+	}
+
+	return &domain.Student{
+		Name:  name,
+		Age:   age,
+		Grade: grade,
+	}, nil
 }
 
 func (a *App) storeData(student *domain.Student) (bool, error) {
@@ -68,9 +65,13 @@ func (a *App) storeData(student *domain.Student) (bool, error) {
 }
 
 func (a *App) storeOutput() {
-	fmt.Println("Студенты из хранилища:")
+	fmt.Println("\nСтуденты из хранилища:")
 	students := a.Repository.Get()
+
+	count := 0
+
 	for _, student := range students {
-		fmt.Printf("%s %d %d", student.Name, student.Age, student.Grade)
+		count++
+		fmt.Printf("\t%d) %s %d %d\n", count, student.Name, student.Age, student.Grade)
 	}
 }
