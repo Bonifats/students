@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"students/domain"
 )
 
@@ -18,7 +19,7 @@ func (a *App) Run() {
 		newStudent, err := a.inputData()
 		if err != nil {
 			if err != io.EOF {
-				fmt.Print(err)
+				log.Print(err)
 				continue
 			}
 
@@ -27,7 +28,7 @@ func (a *App) Run() {
 
 		_, err = a.storeData(newStudent)
 		if err != nil {
-			fmt.Print(err)
+			log.Print(err)
 			continue
 		}
 	}
@@ -40,12 +41,12 @@ func (a *App) inputData() (*domain.Student, error) {
 	var name string
 
 	_, err := fmt.Scanf("%s %d %d", &name, &age, &grade)
-	if err != nil {
+	if err == io.EOF {
 		return nil, err
 	}
 
 	if name <= "" || age <= 0 || grade <= 0 {
-		return nil, errors.New(fmt.Sprintf("Некорректные данные %s%d%d", name, age, grade))
+		return nil, errors.New("некорректные данные")
 	}
 
 	return &domain.Student{
@@ -67,10 +68,10 @@ func (a *App) storeOutput() {
 	fmt.Println("\nСтуденты из хранилища:")
 	students := a.Repository.Get()
 
-	count := 0
+	counter := 0
 
 	for _, student := range students {
-		count++
-		fmt.Printf("\t%d) %s %d %d\n", count, student.Name, student.Age, student.Grade)
+		counter++
+		fmt.Printf("\t%d) %s %d %d\n", counter, student.Name, student.Age, student.Grade)
 	}
 }
