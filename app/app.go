@@ -28,7 +28,6 @@ func (a *App) Run() {
 		_, err = a.storeData(newStudent)
 		if err != nil {
 			fmt.Print(err)
-
 			continue
 		}
 	}
