@@ -97,7 +97,7 @@ func NewStudentStorage() StudentStorage {
 
 func (ss StudentStorage) Get(name string) (*Student, error) {
 	if exist := ss.contains(name); !exist {
-		return nil, errors.New(fmt.Sprintf("Студент с данным именем не существует"))
+		return nil, errors.New("студент с данным именем не существует")
 	}
 
 	return ss[name], nil
@@ -105,7 +105,7 @@ func (ss StudentStorage) Get(name string) (*Student, error) {
 
 func (ss StudentStorage) Put(student *Student) (bool, error) {
 	if exist := ss.contains(student.Name); exist {
-		return false, errors.New(fmt.Sprintf("Студент с данным именем уже существует"))
+		return false, errors.New("студент с данным именем уже существует")
 	}
 
 	ss[student.Name] = student
