@@ -1,15 +1,30 @@
-package app
+package main
 
 import (
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"students/domain"
 )
 
+func main() {
+	app := &App{}
+
+	app.Repository = NewStudentStorage()
+
+	app.Run()
+}
+
+type Student struct {
+	Name  string
+	Age   int
+	Grade int
+}
+
+type StudentStorage map[string]*Student
+
 type App struct {
-	Repository domain.Repository
+	Repository StudentStorage
 }
 
 func (a *App) Run() {
@@ -34,7 +49,7 @@ func (a *App) Run() {
 	}
 }
 
-func (a *App) inputData() (*domain.Student, error) {
+func (a *App) inputData() (*Student, error) {
 	fmt.Print("Введите данные (Имя, возраст, курс) через пробел или нажмите `ctrl+d` для завершения: ")
 
 	var age, grade int
@@ -49,14 +64,14 @@ func (a *App) inputData() (*domain.Student, error) {
 		return nil, errors.New("некорректные данные")
 	}
 
-	return &domain.Student{
+	return &Student{
 		Name:  name,
 		Age:   age,
 		Grade: grade,
 	}, nil
 }
 
-func (a *App) storeData(student *domain.Student) (bool, error) {
+func (a *App) storeData(student *Student) (bool, error) {
 	if _, err := a.Repository.Put(student); err != nil {
 		return false, err
 	}
@@ -66,7 +81,7 @@ func (a *App) storeData(student *domain.Student) (bool, error) {
 
 func (a *App) storeOutput() {
 	fmt.Println("\nСтуденты из хранилища:")
-	students := a.Repository.Get()
+	students := a.Repository
 
 	counter := 0
 
@@ -74,4 +89,32 @@ func (a *App) storeOutput() {
 		counter++
 		fmt.Printf("\t%d) %s %d %d\n", counter, student.Name, student.Age, student.Grade)
 	}
+}
+
+func NewStudentStorage() StudentStorage {
+	return make(map[string]*Student, 0)
+}
+
+func (ss StudentStorage) Get(name string) (*Student, error) {
+	if exist := ss.contains(name); !exist {
+		return nil, errors.New(fmt.Sprintf("Студент с данным именем не существует"))
+	}
+
+	return ss[name], nil
+}
+
+func (ss StudentStorage) Put(student *Student) (bool, error) {
+	if exist := ss.contains(student.Name); exist {
+		return false, errors.New(fmt.Sprintf("Студент с данным именем уже существует"))
+	}
+
+	ss[student.Name] = student
+
+	return true, nil
+}
+
+func (ss StudentStorage) contains(name string) bool {
+	_, ok := ss[name]
+
+	return ok
 }
