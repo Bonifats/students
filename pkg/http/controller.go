@@ -14,7 +14,7 @@ type Controller struct {
 	Storage storage.Storage
 }
 
-func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) UserCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -37,7 +37,7 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request) {
 	c.setResponse(w, http.StatusCreated, "User was created")
 }
 
-func (c *Controller) Attach(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) UserAttach(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -70,7 +70,7 @@ func (c *Controller) Attach(w http.ResponseWriter, r *http.Request) {
 	c.setResponse(w, http.StatusOK, "Users were attached")
 }
 
-func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) UserDelete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "DELETE" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -93,7 +93,7 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	c.setResponse(w, http.StatusOK, "User was deleted")
 }
 
-func (c *Controller) GetFriends(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) UserGetFriends(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -126,7 +126,7 @@ func (c *Controller) GetFriends(w http.ResponseWriter, r *http.Request) {
 	c.setResponse(w, http.StatusOK, "")
 }
 
-func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) UserUpdate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "PUT" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

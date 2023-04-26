@@ -20,11 +20,11 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
 
-	r.Post("/create", c.Create)
-	r.Post("/make_friends", c.Attach)
-	r.Delete("/user", c.Delete)
-	r.Get("/friends/{id}", c.GetFriends)
-	r.Put("/{id}", c.Update)
+	r.Post("/create", c.UserCreate)
+	r.Post("/make_friends", c.UserAttach)
+	r.Delete("/user", c.UserDelete)
+	r.Get("/friends/{id}", c.UserGetFriends)
+	r.Put("/{id}", c.UserUpdate)
 
 	err := http.ListenAndServe("localhost:8080", r)
 	if err != nil {

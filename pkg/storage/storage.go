@@ -4,18 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"students/pkg/user"
+	pUser "students/pkg/user"
 )
 
 type Storage struct {
-	store map[int]*user.User
+	store map[int]*pUser.User
 }
 
 func NewStorage() Storage {
-	return Storage{make(map[int]*user.User, 0)}
+	return Storage{make(map[int]*pUser.User, 0)}
 }
 
-func (s Storage) Get(id int) (*user.User, error) {
+func (s Storage) Get(id int) (*pUser.User, error) {
 	if exist := s.contains(id); !exist {
 		return nil, errors.New(fmt.Sprint("User not found"))
 	}
@@ -23,14 +23,14 @@ func (s Storage) Get(id int) (*user.User, error) {
 	return s.store[id], nil
 }
 
-func (s Storage) GetFriends(id int) ([]*user.User, error) {
-	u, err := s.Get(id)
+func (s Storage) GetFriends(id int) ([]*pUser.User, error) {
+	user, err := s.Get(id)
 	if err != nil {
 		return nil, err
 	}
 
-	friends := make([]*user.User, 0, len(u.Friends))
-	for _, friendId := range u.Friends {
+	friends := make([]*pUser.User, 0, len(user.Friends))
+	for _, friendId := range user.Friends {
 		if val, ok := s.store[friendId]; ok {
 			friends = append(friends, val)
 		}
@@ -39,7 +39,7 @@ func (s Storage) GetFriends(id int) ([]*user.User, error) {
 	return friends, nil
 }
 
-func (s Storage) Add(u *user.User) (bool, error) {
+func (s Storage) Add(u *pUser.User) (bool, error) {
 	u.Id = len(s.store) + 1
 	s.store[u.Id] = u
 
@@ -48,69 +48,69 @@ func (s Storage) Add(u *user.User) (bool, error) {
 	return true, nil
 }
 
-func (s Storage) Put(id int, u *user.User) (bool, error) {
-	eu, err := s.Get(id)
+func (s Storage) Put(id int, user *pUser.User) (bool, error) {
+	existUser, err := s.Get(id)
 	if err != nil {
 		return false, err
 	}
 
-	if u.Name != "" {
-		eu.Name = u.Name
+	if user.Name != "" {
+		existUser.Name = user.Name
 	}
 
-	if u.Age != 0 {
-		eu.Age = u.Age
+	if user.Age != 0 {
+		existUser.Age = user.Age
 	}
 
-	s.store[eu.Id] = eu
+	s.store[existUser.Id] = existUser
 
 	return true, nil
 }
 
 func (s Storage) Attach(suId int, tuId int) (bool, error) {
-	source, err := s.Get(suId)
+	sourceUser, err := s.Get(suId)
 	if err != nil {
 		return false, err
 	}
 
-	target, err := s.Get(tuId)
+	targetUser, err := s.Get(tuId)
 	if err != nil {
 		return false, err
 	}
 
 	founded := false
-	for _, fid := range source.Friends {
-		if fid == target.Id {
+	for _, fid := range sourceUser.Friends {
+		if fid == targetUser.Id {
 			founded = true
 			break
 		}
 	}
 
 	if !founded {
-		source.Friends = append(source.Friends, target.Id)
+		sourceUser.Friends = append(sourceUser.Friends, targetUser.Id)
 	}
 
-	s.store[source.Id] = source
+	s.store[sourceUser.Id] = sourceUser
 
 	return true, nil
 }
 
 func (s Storage) Delete(id int) (bool, error) {
-	u, err := s.Get(id)
+	user, err := s.Get(id)
 	if err != nil {
 		return false, err
 	}
 
-	for id, us := range s.store {
-		for i, friendId := range us.Friends {
-			if u.Id == friendId {
-				s.store[id].Friends = append(us.Friends[:i], us.Friends[i+1:]...)
+	for id, userFroStore := range s.store {
+		for i, friendId := range userFroStore.Friends {
+			if user.Id == friendId {
+				s.store[id].Friends = append(userFroStore.Friends[:i], userFroStore.Friends[i+1:]...)
 				break
 			}
 		}
 	}
 
-	delete(s.store, u.Id)
+	delete(s.store, user.Id)
 
 	return true, nil
 }
