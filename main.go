@@ -1,120 +1,33 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"io"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log"
+	"net/http"
+	h "students/pkg/http"
+	"students/pkg/storage"
 )
 
 func main() {
-	app := &App{}
+	r := chi.NewRouter()
 
-	app.Repository = NewStudentStorage()
+	strg := storage.NewStorage()
+	c := h.Controller{Storage: strg}
 
-	app.Run()
-}
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.URLFormat)
 
-type Student struct {
-	Name  string
-	Age   int
-	Grade int
-}
+	r.Post("/create", c.Create)
+	r.Post("/make_friends", c.Attach)
+	r.Delete("/user", c.Delete)
+	r.Get("/friends/{id}", c.GetFriends)
+	r.Put("/{id}", c.Update)
 
-type StudentStorage map[string]*Student
-
-type App struct {
-	Repository StudentStorage
-}
-
-func (a *App) Run() {
-	defer a.storeOutput()
-
-	for {
-		newStudent, err := a.inputData()
-		if err != nil {
-			if err != io.EOF {
-				log.Print(err)
-				continue
-			}
-
-			break
-		}
-
-		_, err = a.storeData(newStudent)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
+	err := http.ListenAndServe("localhost:8080", r)
+	if err != nil {
+		log.Fatal(err)
 	}
-}
-
-func (a *App) inputData() (*Student, error) {
-	fmt.Print("Введите данные (Имя, возраст, курс) через пробел или нажмите `ctrl+d` для завершения: ")
-
-	var age, grade int
-	var name string
-
-	_, err := fmt.Scanf("%s %d %d", &name, &age, &grade)
-	if err == io.EOF {
-		return nil, err
-	}
-
-	if name <= "" || age <= 0 || grade <= 0 {
-		return nil, errors.New("некорректные данные")
-	}
-
-	return &Student{
-		Name:  name,
-		Age:   age,
-		Grade: grade,
-	}, nil
-}
-
-func (a *App) storeData(student *Student) (bool, error) {
-	if _, err := a.Repository.Put(student); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (a *App) storeOutput() {
-	fmt.Println("\nСтуденты из хранилища:")
-	students := a.Repository
-
-	counter := 0
-
-	for _, student := range students {
-		counter++
-		fmt.Printf("\t%d) %s %d %d\n", counter, student.Name, student.Age, student.Grade)
-	}
-}
-
-func NewStudentStorage() StudentStorage {
-	return make(map[string]*Student, 0)
-}
-
-func (ss StudentStorage) Get(name string) (*Student, error) {
-	if exist := ss.contains(name); !exist {
-		return nil, errors.New("студент с данным именем не существует")
-	}
-
-	return ss[name], nil
-}
-
-func (ss StudentStorage) Put(student *Student) (bool, error) {
-	if exist := ss.contains(student.Name); exist {
-		return false, errors.New("студент с данным именем уже существует")
-	}
-
-	ss[student.Name] = student
-
-	return true, nil
-}
-
-func (ss StudentStorage) contains(name string) bool {
-	_, ok := ss[name]
-
-	return ok
 }
